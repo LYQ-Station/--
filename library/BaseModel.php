@@ -29,7 +29,7 @@ class BaseModel
         $this->db->query('set names utf8');
         Zend_Registry::set('db', $this->db);
         
-        $this->cache = Zend_Registry::get('cache');
+//        $this->cache = Zend_Registry::get('cache');
     }
 
 }
