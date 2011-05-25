@@ -2,7 +2,7 @@
 define('EXT_URL', 'http://mc.dev');
 define('SITE_PATH', dirname($_SERVER['DOCUMENT_ROOT']));
 define('ETC_PATH', SITE_PATH.'/etc');
-define('APPS_PATH', SITE_PATH.'/adminapp');
+define('APPS_PATH', SITE_PATH.'/appadmin');
 define('LIB_PATH', SITE_PATH.'/library');
 define('CACHE_PATH',SITE_PATH.'/cache');
 
