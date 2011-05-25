@@ -55,7 +55,7 @@ $fc = Zend_Controller_Front::getInstance();
 $fc->throwExceptions(true);
 
 //load modules conf
-$modules_conf = new Zend_Config_Ini(ETC_PATH.'/applications.conf', 'applications');
+$modules_conf = new Zend_Config_Ini(ETC_PATH.'/apps-admin.conf', 'applications');
 $modules = array();
 foreach ($modules_conf->toArray() as $m)
 {

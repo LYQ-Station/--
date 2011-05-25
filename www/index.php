@@ -22,8 +22,6 @@ set_include_path(
 require_once 'Zend/Loader/Autoloader.php';
 Zend_Loader_Autoloader::getInstance()->setFallbackAutoloader(true);
 
-Zend_Session::start();
-
 //global config
 $config = new Zend_Config_Ini(ETC_PATH.'/global.conf', 'develop');	
 Zend_Registry::set('config', $config);
@@ -36,13 +34,14 @@ $cache = Zend_Cache::factory('Core', 'File',
 Zend_Registry::set('cache', $cache);
 
 //layout
-Zend_Layout::startMvc(
-	array('viewSuffix' => 'php')
-);
+Zend_Layout::startMvc(array(
+    'layoutPath'    => SITE_PATH . '/layout',
+    'layout'        => 'mc-layout',
+    'viewSuffix'    => 'php'
+));
 
 //view & helper
 $view = new Zend_View(array('encoding' => 'utf-8', 'helperPath' => LIB_PATH.'/view_helper'));
-Zend_Registry::set('view', $view);
 Zend_Controller_Action_HelperBroker::addPath(LIB_PATH.'/action_helpers');
 Zend_Controller_Action_HelperBroker::addHelper(
 	new Zend_Controller_Action_Helper_ViewRenderer(
@@ -56,7 +55,7 @@ $fc = Zend_Controller_Front::getInstance();
 $fc->throwExceptions(true);
 
 //load modules conf
-$modules_conf = new Zend_Config_Ini(ETC_PATH.'/applications.conf', 'applications');
+$modules_conf = new Zend_Config_Ini(ETC_PATH.'/apps-mc.conf', 'applications');
 $modules = array();
 foreach ($modules_conf->toArray() as $m)
 {
@@ -64,6 +63,15 @@ foreach ($modules_conf->toArray() as $m)
 }
 $fc->setControllerDirectory($modules);
 Zend_Registry::set('modules', $modules_conf);
+
+//set default module
+$fc->getRouter()->addRoute(
+	'redirect',
+	new Zend_Controller_Router_Route_Static(
+		'',
+		array('module' => 'index', 'controller' => 'index', 'action' => 'index')
+	)
+);
 
 //$fc->registerPlugin(new AuthPlugin());
 $fc->dispatch();

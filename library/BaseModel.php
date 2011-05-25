@@ -24,6 +24,7 @@ class BaseModel
     
     public function __construct ()
     {
+        $config = Zend_Registry::get('config');
         $this->db = Zend_Db::factory($config->db);
         $this->db->query('set names utf8');
         Zend_Registry::set('db', $this->db);
