@@ -27,11 +27,11 @@ $config = new Zend_Config_Ini(ETC_PATH.'/global.conf', 'develop');
 Zend_Registry::set('config', $config);
 
 //cache
-$cache = Zend_Cache::factory('Core', 'File',
-    array('lifetime' => rand(60, 300), 'automatic_serialization' => true, 'caching' => true),
-    array('cache_dir' => SITE_PATH . '/cache')
-);
-Zend_Registry::set('cache', $cache);
+//$cache = Zend_Cache::factory('Core', 'File',
+//    array('lifetime' => rand(60, 300), 'automatic_serialization' => true, 'caching' => true),
+//    array('cache_dir' => SITE_PATH . '/cache')
+//);
+//Zend_Registry::set('cache', $cache);
 
 //layout
 Zend_Layout::startMvc(array(
