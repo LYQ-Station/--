@@ -65,7 +65,7 @@ class BaseController extends Zend_Controller_Action
         
         $this->_helper->viewRenderer->setNoRender();
         
-        $this->cache = Zend_Registry::get('cache');
+//        $this->cache = Zend_Registry::get('cache');
         
         $this->init();
     }

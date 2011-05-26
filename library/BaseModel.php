@@ -13,7 +13,7 @@ class BaseModel
     protected $cache;
 
 	/**
-	 * @var Zend_Session_Namespace
+	 * @var Token
 	 */
     protected $token;
 
@@ -24,12 +24,9 @@ class BaseModel
     
     public function __construct ()
     {
-        $config = Zend_Registry::get('config');
-        $this->db = Zend_Db::factory($config->db);
-        $this->db->query('set names utf8');
-        Zend_Registry::set('db', $this->db);
-        
 //        $this->cache = Zend_Registry::get('cache');
+        
+        $this->db = GlobalFactory::get_db();
     }
 
 }

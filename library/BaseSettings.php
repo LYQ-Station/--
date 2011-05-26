@@ -1,18 +1,12 @@
 <?php
 
 /**
- * 设置类
+ * 基础设置类
  *
  */
 class BaseSettings
 {
-    const C_COMMON      = 0;
-    
-    const C_IMAGE       = 1;
-    
-    const C_VIDEO       = 2;
-    
-    const C_VIDEO_EXT   = 3;
+    const TAB_SETTINGS  = 'mc_settings';
     
     const T_INT         = 1;
     
@@ -20,49 +14,114 @@ class BaseSettings
     
     const T_ARRAY       = 3;
     
-    static protected $_instance;
-
-    protected $db;
-
-    /**
-     *
-     * @return BaseSettings 
-     */
-    static public function get_instance ()
-    {
-        if (!self::$_instance)
-        {
-            $c = __CLASS__;
-            self::$_instance = new $c;
-        }
-        
-        return self::$_instance;
-    }
+    const T_STRING      = 4;
     
-    protected function __construct ()
-    {
-        $this->db = Zend_Registry::get('db');
-    }
+    const DEFAULT_NAMESPACE     = 'core.';
 
-    public function fetch ($name, $category =0)
+    static public function get ($name, $namespace = null)
     {
-        $select = $this->db->select()
-                ->from(DBTables::ADMIN_SETTINGS)
-                ->where('category=?', $category);
+        if (empty($name))
+            return false;
         
-        if ($name)
+        $db = GlobalFactory::get_db();
+        
+        if ('*' == $name && null === $namespace)
         {
-            $select->where('name=?', $name)->limit(1);
+            $select = $db->select() ->from(self::TAB_SETTINGS);
+            echo $select;exit;
+            
+            $res = $db->query($select);
+        
+            if (!$res)
+                return false;
+
+            $ret_array = array();
+            while ($arr = $res->fetch())
+            {
+                switch ($arr['type'])
+                {
+                    case self::T_INT :
+                        $arr['value'] = intval($arr['value']);
+                        break;
+
+                    case  self::T_FLOAT :
+                        $arr['value'] = floatval($arr['value']);
+                        break;
+
+                    case self::T_ARRAY :
+                        $arr['value'] = unserialize($arr['value']);
+                        break;
+
+                    case self::T_STRING :
+                        break;
+                }
+
+                $ret_array[$arr['name']] = $arr['value'];
+            }
+
+            return $ret_array;
         }
-        
-        $res = $this->db->query($select);
-        
-        if (!$res)
-            return null;
-        
-        $ret_array = array();
-        while ($arr = $res->fetch())
+        elseif ('*' == $name && null !== $namespace)
         {
+            $name = $namespace.str_replace('*', '%', $name);
+            
+            $select = $db->select()
+                ->from(self::TAB_SETTINGS)
+                ->where('name like ?', $name);
+            
+            echo $select;exit;
+            $res = $db->query($select);
+        
+            if (!$res)
+                return false;
+
+            $ret_array = array();
+            while ($arr = $res->fetch())
+            {
+                switch ($arr['type'])
+                {
+                    case self::T_INT :
+                        $arr['value'] = intval($arr['value']);
+                        break;
+
+                    case  self::T_FLOAT :
+                        $arr['value'] = floatval($arr['value']);
+                        break;
+
+                    case self::T_ARRAY :
+                        $arr['value'] = unserialize($arr['value']);
+                        break;
+
+                    case self::T_STRING :
+                        break;
+                }
+
+                $ret_array[$arr['name']] = $arr['value'];
+            }
+
+            return $ret_array;
+        }
+        else
+        {
+            if (null === $namespace)
+            {
+                $namespace = self::DEFAULT_NAMESPACE;
+            }
+            
+            $name = $namespace.$name;
+            $select = $db->select()
+                ->from(self::TAB_SETTINGS)
+                ->where('name=?', $name)
+                ->limit(1);
+            
+            echo $select;exit;
+            $arr = $db->fetchRow($select);
+            
+            if (empty($arr))
+            {
+                return false;
+            }
+            
             switch ($arr['type'])
             {
                 case self::T_INT :
@@ -76,16 +135,21 @@ class BaseSettings
                 case self::T_ARRAY :
                     $arr['value'] = unserialize($arr['value']);
                     break;
+
+                case self::T_STRING :
+                    break;
             }
             
-            $ret_array[$arr['name']] = $arr['value'];
+            return $arr['value'];
         }
-        
-        return $ret_array;
     }
     
-    public function set ($name, $value, $type, $category)
+    static public function set ($name, $value, $type = 4, $namespace = 'core.')
     {
+        $name = $namespace . $name;
+        
+        $db = GlobalFactory::get_db();
+        
         switch ($type)
         {
             case self::T_INT :
@@ -99,21 +163,35 @@ class BaseSettings
             case self::T_ARRAY :
                 $value = serialize($value);
                 break;
+            
+            case self::T_STRING :
+                break;
         }
         
-        $rows = $this->db->update(DBTables::ADMIN_SETTINGS, array(
+        $tab = self::TAB_SETTINGS;
+        $sql = "REPLACE INTO $tab VALUES (:name, :value, :type)";
+        $res = $db->query($sql, array(
+            'name'      => $name,
             'value'     => $value,
             'type'      => $type
-        ), "category='$category' AND name='$name'");
+        ));
         
-        if (!$rows)
+        return $res->rowCount();
+    }
+    
+    static public function delete ($name, $namespace = 'core.')
+    {
+        $name = $namespace . $name;
+        
+        $db = GlobalFactory::get_db();
+        
+        if ('*' == $name{(strlen($name)-1)})
         {
-            $this->db->insert(DBTables::ADMIN_SETTINGS, array(
-                'category'      => $category,
-                'name'          => $name,
-                'value'         => $value,
-                'type'          => $type
-            ));
+            return $db->delete(self::TAB_SETTINGS, $db->quoteInto('name like ?', $name));
+        }
+        else
+        {
+            return $db->delete(self::TAB_SETTINGS, $db->quoteInto('name=?', $name));
         }
     }
 }
