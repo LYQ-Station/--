@@ -17,7 +17,15 @@ class GlobalFactory
 	static protected $db;
     
     /**
-	 * 创建数据库
+     * 缓存
+     *
+     * @var Zend_Cache
+     */
+    static protected $cache;
+
+
+    /**
+	 * 创建数据库实例
 	 *
 	 * @return Zend_Db
 	 */
@@ -32,4 +40,22 @@ class GlobalFactory
         
         return self::$db;
 	}
+    
+    /**
+     * 创建缓存实例
+     *
+     * @return Zend_Cache
+     */
+    static public function get_cache ()
+    {
+        if (!self::$cache)
+        {
+            self::$cache = Zend_Cache::factory('Core', 'File',
+                array('lifetime' => rand(60, 300), 'automatic_serialization' => true, 'caching' => true),
+                array('cache_dir' => SITE_PATH . '/cache')
+            );
+        }
+        
+        return self::$cache;
+    }
 }

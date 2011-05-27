@@ -17,25 +17,24 @@ class TokenException extends Exception
  * 记录登录用户的基本信息和权限信息，与Token表中信息对应
  *
  * @author Steven
- * @date 2010-07-15
+ * @date 2011-05-27
  */
 class Token
 {
-	const TOKEN_TABLE = 'egt_acl_token';
-
 	/**
 	 * 单实例
 	 *
 	 * @var Token
 	 */
 	static protected $instance;
+    
 	protected $db;
 	protected $sn;
-	protected $data;
+    protected $data     = array();
 
-	private function __construct ($sn)
+    private function __construct ($sn)
 	{
-		$this->db = Zend_Registry::get('db');
+		$this->db = GlobalFactory::get_db();
 
 		$this->sn = $sn;
 	}
@@ -98,7 +97,7 @@ class Token
 	 */
 	private function fetch ()
 	{
-		$select = $this->db->select()->from(self::TOKEN_TABLE)->where('sn = ?', $this->sn)->limit(1);
+		$select = $this->db->select()->from(DBTables::TOKEN)->where('sn = ?', $this->sn)->limit(1);
 		$profile = $this->db->fetchRow($select);
 
 		if (!$profile)
@@ -112,22 +111,12 @@ class Token
 		}
 
 		$this->data['uid'] = $profile['uid'];
-		$this->data['usn'] = $profile['usn'];
 		$this->data['uname'] = $profile['uname'];
 		$this->data['login_time'] = $profile['login_time'];
 		$this->data['sync_time'] = $profile['sync_time'];
-		$this->data['login_ip'] = $profile['login'];
+		$this->data['login_ip'] = $profile['login_ip'];
 
 		return true;
-	}
-
-	private function _getinfo ()
-	{
-		$select = $this->db->select();
-		$select->from(self::TOKEN_TABLE)->where('sn = ?', $this->sn)->limit(1);
-		$profile = $this->db->fetchRow($select);
-		$this->info = unserialize($profile['info']);
-		return $this->info;
 	}
 
 	/**
@@ -152,101 +141,21 @@ class Token
 		$db_fields = array_merge($db_fields, $fields);
 
 		$select = $this->db->select();
-		$select->from(self::TOKEN_TABLE, 'sn')->where('sn = ?', $this->sn)->limit(1);
+		$select->from(DBTables::TOKEN, 'sn')->where('sn = ?', $this->sn)->limit(1);
 		$profile = $this->db->fetchRow($select);
 
 		if (!empty($profile))
 		{
 			$where = $this->db->quoteInto('sn=?', $this->sn);
-			$this->db->update(self::TOKEN_TABLE, $db_fields, $where);
+			$this->db->update(DBTables::TOKEN, $db_fields, $where);
 		}
 		else
 		{
 			$db_fields['login_time'] = $now;
 			$db_fields['login_ip'] = NetUtils::get_client_ip_long();
 
-			$this->db->insert(self::TOKEN_TABLE, $db_fields);
+			$this->db->insert(DBTables::TOKEN, $db_fields);
 		}
-	}
-
-	/**
-	 * 增加TOKEN--info信息
-	 *
-	 * @param mix $mix
-	 * @param str $value
-	 * 
-	 */
-	public function setinfo ($mix, $value="")
-	{
-		$list = $row = array();
-		$list = $this->_getinfo();
-		if (is_array($mix))
-		{
-			foreach ($mix as $key => $val)
-			{
-				$list[$key] = $val;
-			}
-		}
-		elseif (is_string($mix))
-		{
-			$list[$mix] = $value;
-		}
-		$set = serialize($list);
-		$row = array('info' => $set);
-		$where = $this->db->quoteInto('sn = ?', $this->sn);
-		$this->db->update(self::TOKEN_TABLE, $row, $where);
-	}
-
-	/**
-	 * 获得TOKEN--info信息
-	 * @param <string or array> $mix
-	 * @return <string or array>
-	 */
-	public function getinfo ($mix)
-	{
-		$list = array();
-		$list = $this->_getinfo();
-		if (is_array($mix))
-		{
-			foreach ($mix as $key => $val)
-			{
-				$row[$key] = $list[$key];
-			}
-			return $row;
-		}
-		elseif (is_string($mix))
-		{
-			if (!empty($list[$mix]))
-			{
-				return $list[$mix];
-			}
-		}
-	}
-
-	/**
-	 * 删除token
-	 * @param <array or string> $mix
-	 */
-	public function deleteinfo ($mix)
-	{
-		$list = array();
-		$list = $this->_getinfo();
-		if (is_array($mix))
-		{
-			foreach ($mix as $key => $val)
-			{
-				unset($list[$key]);
-			}
-		}
-		if (is_string($mix) && !empty($mix))
-		{
-			unset($list[$mix]);
-		}
-
-		$set = serialize($list);
-		$row = array('info' => $set);
-		$where = $this->db->quoteInto('sn = ?', $this->sn);
-		$this->db->update(self::TOKEN_TABLE, $row, $where);
 	}
 
 	/**
@@ -256,9 +165,8 @@ class Token
 	public function destroy ()
 	{
 		$where = $this->db->quoteInto('sn = ?', $this->sn);
-		$this->db->delete(self::TOKEN_TABLE, $where);
+		$this->db->delete(DBTables::TOKEN, $where);
 		$this->sn = null;
-		$this->data = null;
 	}
 
 	/**
@@ -268,7 +176,7 @@ class Token
 	 */
 	public function is_logined ()
 	{
-		return '' != $this->usn;
+		return '' != $this->uid;
 	}
 
 	/**
@@ -280,6 +188,16 @@ class Token
 	{
 		return (time() - $this->sync_time > 30 * 60);
 	}
+    
+    /**
+     * 是否为同一IP
+     *
+     * @return bool
+     */
+    public function is_same_ip ()
+    {
+        return NetUtils::get_client_ip_long() == $this->login_ip;
+    }
 
 	/**
 	 * 获取用所有权限
