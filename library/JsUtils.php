@@ -3,46 +3,69 @@
 /**
  * JS实用工具
  * 
+ * @author Steven
  */
 class JsUtils
 {
-	public static function start ()
+	static protected $script_sections	= array();
+
+	static public function start ()
 	{
 		echo '<script type="text/javascript">';
 	}
 	
-	public static function end ()
+	static public function end ()
 	{
 		echo '</script>';
 	}
 	
-	public static function alert ($msg, $isvar = false)
+	static public function alert ($msg)
 	{
-		if(true == $isvar)
-		{
-			echo 'self.alert('.$msg.');';
-			return ;
-		}
 		echo 'self.alert("'.$msg.'");';
 	}
 	
-	public static function history ($no)
+	static public function history ($no)
 	{
-		echo 'self.history.go('.$no.');';
+		echo "self.history.go($no);";
 	}
 	
-	public static function back ()
+	static public function back ()
 	{
 		echo 'self.history.back();';
 	}
 
-	public static function rediect ($url)
+	static public function rediect ($url)
 	{
 		echo "self.location.replace('$url');";
 	}
 	
-	public static function close ()
+	static public function close ()
 	{
 		echo 'self.close();';
+	}
+	
+	static public function ob_start ()
+	{
+		ob_start();
+	}
+	
+	static public function ob_end ()
+	{
+		$script = ob_get_clean();
+		
+		array_push(self::$script_sections, $script);
+	}
+	
+	static public function ob_flush ()
+	{
+		if (empty(self::$script_sections))
+		{
+			return '';
+		}
+		
+		while ($script = array_pop(self::$script_sections))
+		{
+			echo $script;
+		}
 	}
 }

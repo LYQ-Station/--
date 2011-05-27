@@ -16,4 +16,5 @@
 <body>
 <?=$this->layout()->content?>
 </body>
+<?=JsUtils::ob_flush()?>
 </html>

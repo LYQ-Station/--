@@ -2,7 +2,7 @@
     <div id="top_navigation">
         <div class="logo">LBS管理后台 test</div>
         <div id="nav">
-            Steven
+            <?=$this->token->uname?>
             <a href="<?=$this->buildUrl('logout','auth')?>">[登出]</a>
         </div>
         <div class="clear"></div>

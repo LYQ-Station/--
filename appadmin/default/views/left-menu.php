@@ -10,7 +10,7 @@
     <ul>
         <li><span>微博管理</span>
             <ul class="sub">
-                <li><a href="<?=$this->buildUrl('list','article','blog')?>">博文列表</a></li>
+                <li><a href="<?=$this->buildUrl('list','index','resource')?>">博文列表</a></li>
                 <li><a href="<?=$this->buildUrl('list','media','blog')?>">博文媒体列表</a></li>
             </ul>
         </li>

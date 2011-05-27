@@ -140,8 +140,7 @@ class Token
 
 		$db_fields = array_merge($db_fields, $fields);
 
-		$select = $this->db->select();
-		$select->from(DBTables::TOKEN, 'sn')->where('sn = ?', $this->sn)->limit(1);
+		$select = $this->db->select()->from(DBTables::TOKEN, 'sn')->where('sn = ?', $this->sn)->limit(1);
 		$profile = $this->db->fetchRow($select);
 
 		if (!empty($profile))
@@ -186,7 +185,7 @@ class Token
 	 */
 	public function is_expire ()
 	{
-		return (time() - $this->sync_time > 30 * 60);
+		return ((time() - $this->sync_time) > 30 * 60);
 	}
     
     /**

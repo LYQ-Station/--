@@ -50,9 +50,9 @@ class BaseController extends Zend_Controller_Action
         
         $config = Zend_Registry::get('config');
         
-//        $this->token = Zend_Registry::get('token');
+        $this->token = Token::get_instance();
         
-//        $this->view->token = $this->token;
+        $this->view->token = $this->token;
         $this->view->request = $this->_request;
         
         $this->view->headTitle($config->web->title, 'SET');
@@ -67,15 +67,32 @@ class BaseController extends Zend_Controller_Action
         
 //        $this->cache = Zend_Registry::get('cache');
         
-        $this->init();
+//        $this->init();
     }
 
 	public function __destruct ()
     {
         $this->view->clearVars();
     }
+	
+	public function dispatch($action)
+	{
+		$this->init();
+		
+		if (!$this->filter($action))
+		{
+			$action = '_emptyAction';
+		}
+		
+		parent::dispatch($action);
+	}
+	
+	public function _emptyAction ()
+	{
+		
+	}
 
-    protected function errorAction ()
+	protected function errorAction ()
     {
     	$this->view->exception = $this->_getParam('error_handler')->exception;
     	$log_msg = '';
@@ -90,6 +107,34 @@ class BaseController extends Zend_Controller_Action
     		$log_msg .= 'uncaught exception';
     	}
     }
+	
+	/**
+	 * 过滤器
+	 *
+	 * @param string $action
+	 * @return bool
+	 */
+	protected function filter ($action)
+	{
+		$filter_class = $this->_request->getControllerName() . 'Filter';
+		
+		if (!class_exists($filter_class, true))
+		{
+			return true;
+		}
+		
+		if (!method_exists($filter_class, $action))
+		{
+			return true;
+		}
+		
+		if (false === call_user_func("$filter_class::$action", $this))
+		{
+			return false;
+		}
+		
+		return true;
+	}
 
 	/**
 	 * 构造地址字符串

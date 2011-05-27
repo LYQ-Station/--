@@ -16,7 +16,10 @@ class AuthPlugin extends Zend_Controller_Plugin_Abstract
 				$request->setModuleName('default');
                 $request->setControllerName('auth');
                 $request->setActionName('login');
+				return;
             }
+			
+			$token->register();
         }
 		else
         {
