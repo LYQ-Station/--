@@ -62,6 +62,10 @@ input.datepicker {
 	padding-left:10px;
 }
 
+.page_head .page_nav * {
+	margin:0 5px;
+}
+
 .page_head .page_nav a{
 	text-decoration:underline;
 }
@@ -109,7 +113,7 @@ input.datepicker {
 .tinfo {
 	width: 100%;
 	border-collapse:collapse;
-	line-height:30px;
+	line-height:28px;
 }
 
 .tinfo th {

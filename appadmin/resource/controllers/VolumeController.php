@@ -1,21 +1,21 @@
 <?php
 
 /**
- * 资源控制器
+ * Volume控制器
  *
  * @author Steven
  */
-class Resource_ResourceController extends BaseController
+class Resource_VolumeController extends BaseController
 {
 	/**
 	 *
-	 * @var ResourceModel
+	 * @var VolumeModel
 	 */
 	protected $model;
 
 	public function init ()
 	{
-		$this->model = new ResourceModel();
+		$this->model = new VolumeModel();
 	}
 
 	public function listAction ()
@@ -39,9 +39,49 @@ class Resource_ResourceController extends BaseController
 		$this->render('resource-list');
 	}
 	
+	public function infoAction ()
+	{
+		$id = $this->_request->id;
+		
+		$this->view->item = $this->model->fetch($id);
+		
+		$this->view->title = $this->view->item['title'];
+		
+		$this->render('volume-addpage');
+	}
+	
 	public function addpageAction ()
 	{
+		$rid = $this->_request->rid;
 		
+		$resource_model = new ResourceModel();
+		$resource = $resource_model->fetch($rid);
+		
+		$this->view->resource = $resource;
+		
+		$this->view->title = 'Create new Volume';
+		$this->view->submit_link = $this->build_url('ajaxadd');
+		$this->render('volume-addpage');
+	}
+	
+	public function ajaxaddAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$fields = $this->_request->p;
+		$this->model->add($fields);
+		
+		AjaxUtils::json('ok');
+	}
+	
+	public function ajaxdeleteAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$id = $this->_request->id;
+		$this->model->delete($id);
+		
+		AjaxUtils::json('ok');
 	}
 
 	public function searchfieldsAction ()

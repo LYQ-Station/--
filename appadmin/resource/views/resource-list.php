@@ -14,6 +14,12 @@
     </div>
 </div>
 <div class="page_body">
+	<div style="border-bottom:1px;#e5e5e5;solid;padding:5px 15px;">
+    	<a href="<?=$this->buildUrl('list',null,null,array('id'=>0))?>">root</a>
+    	<?php if (!empty($this->path_arr)): foreach ($this->path_arr as $id => $p): ?>
+    	 : <a href="<?=$this->buildUrl('list',null,null,array('id'=>$id))?>"><?=$p?></a>
+    	<?php endforeach; endif;?>
+    </div>
     <table class="ttable">
         <tr>
             <th width="25"><input type="checkbox" /></th>
@@ -34,7 +40,9 @@
             <td><?=$item['pid']?></td>
             <td><?=$item['title']?></td>
             <td><?=$item['create_time']?></td>
-            <td width="120" class="op">
+            <td width="170" class="op">
+            	<a href="<?=$this->buildUrl('list',null,null,array('id'=>$item['id']))?>">Enter</a>
+            	<a href="<?=$this->buildUrl('info',null,null,array('id'=>$item['id']))?>">Info</a>
             	<a class="a_dis" href="#" lang="<?=$item['id']?>" status="<?=$item['status']?>">Disable</a>
                 <a class="a_del" href="#" lang="<?=$item['id']?>">Delete</a>
             </td>
@@ -72,6 +80,26 @@ $(function ()
 	
 	$('.a_del').live('click', function ()
 	{
+		if (!confirm('Do you want to delete this Resource?'))
+			return false;
+		
+		var self = $(this);
+		
+		$.ajax({
+			url: '<?=$this->buildUrl('ajaxdelete')?>',
+			data: $.param({id:self.attr('lang')}),
+			success: function (data)
+			{
+				if (data.err_no)
+				{
+					alert(data.err_text);
+					return false;
+				}
+				
+				self.closest('tr').remove();
+			}
+		});
+		
 		return false;
 	});
 	

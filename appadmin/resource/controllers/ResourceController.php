@@ -20,6 +20,7 @@ class Resource_ResourceController extends BaseController
 
 	public function listAction ()
 	{
+		$id = intval($this->_request->id);
 		$page_no = intval($this->_request->page_no);
         
         if ($this->_request->keyword)
@@ -32,17 +33,32 @@ class Resource_ResourceController extends BaseController
             $params['c'] = $this->_request->c;
         }
         
-        $list = $this->model->get_list($page_no, $params);
+        $list = $this->model->get_list($id, $page_no, $params);
         $this->view->items = $list->data;
         $this->view->navigator = $list->pager->get_navigator_str($this->build_url('list',null,null,$params));
+		
+		$this->view->path_arr = $this->model->get_path_arr($id);
 		
 		$this->render('resource-list');
 	}
 	
+	public function infoAction ()
+	{
+		$id = $this->_request->id;
+		
+		$this->view->item = $this->model->fetch($id);
+		
+		$this->view->title = $this->view->item['title'];
+		$this->view->submit_link = $this->build_url('ajaxedit');
+		
+		$this->view->volumes = $this->model->get_volumes($id);
+		
+		$this->render('resource-info');
+	}
+
 	public function addpageAction ()
 	{
-		
-		$this->view->title = '新建资源';
+		$this->view->title = 'Create new Resource';
 		$this->view->submit_link = $this->build_url('ajaxadd');
 		$this->render('resource-addpage');
 	}
@@ -57,16 +73,26 @@ class Resource_ResourceController extends BaseController
 		AjaxUtils::json('ok');
 	}
 	
-	public function editpageAction ()
-	{
-		$this->view->title = '修改资源';
-		$this->view->submit_link = $this->build_url('ajaxedit');
-		$this->render('resource-addpage');
-	}
-	
 	public function ajaxeditAction ()
 	{
+		$this->_helper->layout->disableLayout();
 		
+		$fields = $this->_request->p;
+		$id = $this->_request->id;
+		
+		$this->model->edit($id, $fields);
+		
+		AjaxUtils::json('ok');
+	}
+	
+	public function ajaxdeleteAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$id = $this->_request->id;
+		$this->model->delete($id);
+		
+		AjaxUtils::json('ok');
 	}
 
 	public function searchfieldsAction ()

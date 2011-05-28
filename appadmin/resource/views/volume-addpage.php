@@ -11,11 +11,17 @@
         <table class="tinfo">
         	<tr>
                 <th>Path:</th>
-                <td>-</td>
+                <td>
+                	<?php if (empty($this->resource['path_arr'])):?>
+                    -
+                    <?php else: foreach ($this->resource['path_arr'] as $id => $p): ?>
+                     : <a href="<?=$this->buildUrl('info',null,null,array('id'=>$id))?>"><?=$p?></a>
+                    <?php endforeach; endif;?>
+                </td>
             </tr>
             <tr>
                 <th>Parent Resource:</th>
-                <td><input type="text" class="txt" name="p[pid]" value="<?=$this->item['pid']?>" /></td>
+                <td><input type="text" class="txt" name="p[rid]" value="<?=HTMLUtils::pick_value($this->item['rid'],$this->resource['id'])?>" /><?=$this->resource['title']?></td>
             </tr>
             <tr>
                 <th>Title:</th>
@@ -23,7 +29,10 @@
             </tr>
             <tr>
                 <th>Cover:</th>
-                <td><input type="text" class="txt" name="p[cover_id]" value="<?=$this->item['cover_id']?>" /></td>
+                <td>
+                	<input type="text" class="txt" name="p[cover_id]" value="<?=$this->item['cover_id']?>" />
+                    <button id="upf_bsw">Upload</button>
+                </td>
             </tr>
             <tr>
                 <th>Summary:</th>
@@ -35,6 +44,7 @@
 <?php $this->headLink()->appendStylesheet('/css/jquery.validationEngine.css');?>
 <?php $this->headScript()->appendFile('/js/jquery.ValidationEngineEx.js');?>
 <?php $this->headScript()->appendFile('/js/jquery.form.js');?>
+<?php $this->headScript()->appendFile('/js/lyq.Uploader.js');?>
 <?=JsUtils::ob_start();?>
 <script>
 $(function ()
@@ -97,6 +107,14 @@ $(function ()
 		
 		f_submit();
 		
+		return false;
+	});
+	
+	var uploader = new Uploader();
+	$('#upf_bsw').click(function ()
+	{
+		//$('#xx')[0].click();
+		uploader.upload();
 		return false;
 	});
 });

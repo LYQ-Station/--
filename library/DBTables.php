@@ -8,5 +8,7 @@ class DBTables
 	
 	const RESOURCE		= 'mc_resource';
 	
+	const VOLUME		= 'mc_volume';
+	
 	const TAG			= 'mc_tag';
 }
