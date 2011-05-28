@@ -36,5 +36,36 @@ class ResourceModel extends BaseModel
         
         return $ret;
     }
+	
+	public function add (array $fields)
+	{
+		if (!empty($fields['pid']))
+		{
+			$select = $this->db->select()
+					->from(DBTables::RESOURCE, 'path')
+					->where('id=?', $fields['pid']);
+			
+			$path = $this->db->fetchOne($select);
+			
+			if (!$path)
+			{
+				$fields['pid'] = 0;
+			}
+			else
+			{
+				$fields['path'] = "{$fields['path']}{$fields['pid']}/";
+			}
+		}
+		else
+		{
+			$fields['pid'] = 0;
+			$fields['path'] = '/';
+		}
+		
+		$fields['create_time'] = TimeUtils::db_time();
+		$fields['status'] = 0;
+		
+		$this->db->insert(DBTables::RESOURCE, $fields);
+	}
 }
 

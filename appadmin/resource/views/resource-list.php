@@ -1,9 +1,9 @@
 <div class="page_head">
-    <div class="page_title">用户列表</div>
+    <div class="page_title">Resource List</div>
     <div class="page_nav">
-    	<a href="<?=$this->buildUrl('list')?>">所有用户</a>
-    	<a href="<?=$this->buildUrl('list',null,null,array('c'=>SearchFilter::encode('status=1')))?>">未审核的用户</a>
-        <a href="<?=$this->buildUrl('list',null,null,array('c'=>SearchFilter::encode('status=2')))?>">被锁定的用户</a>
+    	<button id="btn_add">New</button>
+    	<a href="<?=$this->buildUrl('list')?>">All</a>
+    	<a href="<?=$this->buildUrl('list',null,null,array('c'=>SearchFilter::encode('status<>0')))?>">Disabled</a>
     </div>
     <div class="page_tools">
     	<form action="" method="get">
@@ -17,10 +17,10 @@
     <table class="ttable">
         <tr>
             <th width="25"><input type="checkbox" /></th>
-            <th>ID</th>
-            <th>PID</th>
+            <th width="100">ID</th>
+            <th width="100">PID</th>
             <th>Title</th>
-            <th>Create Time</th>
+            <th width="120">Create Time</th>
             <th width="120">操作</th>
         </tr>
         <?php if (!$this->items):?>
@@ -30,12 +30,13 @@
         <?php else: foreach ($this->items as $item):?>
         <tr>
             <td width="25"><input type="checkbox" /></td>
-            <td><?=$item['username']?></td>
-            <td><?=$item['nickname']?></td>
-            <td><?=$item['email']?></td>
-            <td><?=$item['regdate']?></td>
+            <td><?=$item['id']?></td>
+            <td><?=$item['pid']?></td>
+            <td><?=$item['title']?></td>
+            <td><?=$item['create_time']?></td>
             <td width="120" class="op">
-                <a href="<?=$this->buildUrl('index','info',null,array('uid'=>$user['uid']))?>">详细</a>
+            	<a class="a_dis" href="#" lang="<?=$item['id']?>" status="<?=$item['status']?>">Disable</a>
+                <a class="a_del" href="#" lang="<?=$item['id']?>">Delete</a>
             </td>
         </tr>
         <?php endforeach; endif;?>
@@ -58,6 +59,22 @@ $(function ()
 		dataType: 'json'
 	});
 	
+	$('#btn_add').click(function ()
+	{
+		location = '<?=$this->buildUrl('addpage')?>';
+		return false;
+	});
+	
+	$('.a_dis').live('click', function ()
+	{
+		return false;
+	});
+	
+	$('.a_del').live('click', function ()
+	{
+		return false;
+	});
+	
 	//-------------------------------- 高级查询窗口 --------------------------------
 	var srh_win = null;
 	$('#srh_adv_btn').click(function ()
@@ -69,7 +86,7 @@ $(function ()
 				if (data.err_no)
 				{
 					alert(data.err_text);
-					return false;
+					return;
 				}
 				
 				if (srh_win)

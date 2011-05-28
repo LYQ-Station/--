@@ -116,9 +116,9 @@ class BaseController extends Zend_Controller_Action
 	 */
 	protected function filter ($action)
 	{
-		$filter_class = $this->_request->getControllerName() . 'Filter';
+		$filter_class = ucfirst($this->_request->getControllerName()) . 'Filter';
 		
-		if (!class_exists($filter_class, true))
+		if (!class_exists($filter_class, false))
 		{
 			return true;
 		}

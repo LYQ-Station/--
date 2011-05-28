@@ -107,13 +107,26 @@ input.datepicker {
 
 /* information table */
 .tinfo {
+	width: 100%;
+	border-collapse:collapse;
+	line-height:30px;
 }
 
 .tinfo th {
 	font-weight:normal;
 	text-align:right;
-	line-height:25px;
-	width:100px;
+	width:300px;
+	padding:5px 10px 5px 0;
+	border:1px #e5e5e5 solid;
+}
+
+.tinfo td {
+	padding:5px 0px 5px 10px;
+	border:1px #e5e5e5 solid;
+}
+
+.tinfo input.txt {
+	width:500px;
 }
 /* /information table */
 

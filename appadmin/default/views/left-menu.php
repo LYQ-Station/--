@@ -10,17 +10,20 @@
     <ul>
         <li><span>微博管理</span>
             <ul class="sub">
-                <li><a href="<?=$this->buildUrl('list','index','resource')?>">博文列表</a></li>
+                <li><a href="<?=$this->buildUrl('list','resource','resource')?>">ResourceList</a></li>
+                <li><a href="<?=$this->buildUrl('addpage','resource','resource')?>">Add Resource</a></li>
+                <li><a href="<?=$this->buildUrl('addpage','volume','resource')?>">Add Volume</a></li>
+                <li><a href="<?=$this->buildUrl('addpage','uri','resource')?>">Add URI</a></li>
                 <li><a href="<?=$this->buildUrl('list','media','blog')?>">博文媒体列表</a></li>
             </ul>
         </li>
     </ul>
     
     <ul>
-        <li><span>片区管理</span>
+        <li><span>Tags</span>
             <ul class="sub">
-                <li><a href="<?=EXT_URL.'/pages/area/admin.php'?>">创建片区(外链)</a></li>
-                <li><a href="<?=EXT_URL.'/pages/area/admin_area_list.php'?>">片区列表(外链)</a></li>
+                <li><a href="<?=$this->buildUrl('addpage','index','tag')?>">Add Tag</a></li>
+                <li><a href="<?=$this->buildUrl('list','index','tag')?>">Tags</a></li>
             </ul>
         </li>
     </ul>
@@ -76,6 +79,7 @@
         </li>
     </ul>
 </ul>
+<?=JsUtils::ob_start();?>
 <script type="text/javascript">
 $(function ()
 {
@@ -89,3 +93,4 @@ $(function ()
     });
 });
 </script>
+<?=JsUtils::ob_end();?>
