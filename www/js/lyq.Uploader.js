@@ -19,15 +19,43 @@ Uploader.prototype.upload = function (url, callback)
 	form.attr('action', url ? url : (this.configs.url ? this.configs.url : '#'))
 	var file_inp = $('<input type="file" name="upload" />');
 	
+	var self = this;
+	
 	form.append(file_inp);
 	form.appendTo(document.body);
 	
 	file_inp.bind('change', function (evn)
 	{
-		var ifrm = $('<iframe id="_ifrm' + this.instance_no + '_" />');
+		var ifrm = $('<iframe id="_ifrm' + this.instance_no + '_" name="_ifrm' + this.instance_no + '_" style="display:none" />');
 		ifrm.appendTo(document.body);
 		form.attr('target', '_ifrm' + this.instance_no + '_');
-		//form.submit();
+		
+		ifrm.bind('load', function ()
+		{
+			var data = undefined;
+			try
+			{
+				data = $.parseJSON(this.contentDocument.body.innerHTML);
+			}
+			catch (e)
+			{}
+			
+			if (callback && 'function' == typeof callback)
+			{
+				callback.call(this, data);
+			}
+			else if (self.configs.callback && 'function' == typeof self.configs.callback)
+			{
+				self.configs.callback.call(this, data);
+			}
+			
+			ifrm.unbind();
+			ifrm.attr('src', '#');
+			ifrm.remove();
+			form.remove();
+		});
+		
+		form.submit();
 	});
 	
 	file_inp[0].click();

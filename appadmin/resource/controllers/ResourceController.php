@@ -122,6 +122,19 @@ class Resource_ResourceController extends BaseController
 		
 		NetUtils::render_image($img_file);
 	}
+	
+	public function ajaxparentAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$keyword = $this->_request->keyword;
+		if ('' == $keyword)
+		{
+			AjaxUtils::json('');
+		}
+		
+		AjaxUtils::json($this->model->search_for_complete($keyword));
+	}
 
 	public function searchfieldsAction ()
     {

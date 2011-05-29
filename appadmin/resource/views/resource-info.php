@@ -29,8 +29,11 @@
                     </td>
                 </tr>
                 <tr>
-                <th>Parent Resource:</th>
-                    <td><input type="text" class="txt" name="p[pid]" value="<?=$this->item['pid']?>" /></td>
+                    <th>Parent Resource:</th>
+                    <td>
+                        <input type="text" class="txt" id="pid_ac" value="<?=$this->item['parent']['title']?>" />
+                        <input type="hidden" id="pid" name="p[pid]" value="<?=$this->item['pid']?>" />
+                    </td>
                 </tr>
                 <tr>
                     <th>Full Title:</th>
@@ -54,7 +57,7 @@
                 </tr>
                 <tr>
                     <th>Summary:</th>
-                    <td><textarea name="p[summary]"><?=$this->item['summary']?></textarea></td>
+                    <td><textarea id="summary" name="p[summary]"><?=$this->item['summary']?></textarea></td>
                 </tr>
             </table>
         </form>
@@ -99,10 +102,14 @@
 <?php $this->headLink()->appendStylesheet('/css/jquery.validationEngine.css');?>
 <?php $this->headScript()->appendFile('/js/jquery.ValidationEngineEx.js');?>
 <?php $this->headScript()->appendFile('/js/jquery.form.js');?>
+<?php $this->headScript()->appendFile('/js/lyq.Uploader.js');?>
+<?php $this->headScript()->appendFile('/plugins/ckeditor/ckeditor.js');?>
 <?=JsUtils::ob_start();?>
 <script>
 $(function ()
 {
+	var ckeditor = CKEDITOR.replace('summary');
+	
 	$.ajaxSetup({
 		global: false,
 		type: "POST",
@@ -138,6 +145,8 @@ $(function ()
 	
 	$('#btn_save').click(function ()
 	{
+		$('#summary').val(ckeditor.getData());
+		
 		on_submit = function (data)
 		{
 			if (data.err_no)
@@ -180,6 +189,59 @@ $(function ()
 		ifrm.attr('src', $(this).attr('link'));
 		
 		return false;
+	});
+	
+	var uploader = new Uploader({
+		url: '<?=$this->buildUrl('upload')?>',
+		callback: function (data)
+		{
+			if ('' != data.err_no)
+			{
+				alert(data.err_text);
+				return;
+			}
+			
+			form[0]['p[cover]'].value = data.content;
+			$('.cover').attr('src', '<?=$this->buildUrl('cover')?>?' + $.param({cover:data.content}));
+		}
+	});
+	
+	$('#upf_bsw').click(function ()
+	{
+		uploader.upload();
+		return false;
+	});
+	
+	$("#pid_ac").autocomplete({
+		source: function( request, response ) {
+			$.ajax({
+				url: '<?=$this->buildUrl('ajaxparent','resource')?>',
+				dataType: "json",
+				data: {
+					maxRows: 12,
+					keyword: request.term
+				},
+				success: function( data ) {
+					response( $.map( data.content, function( item ) {
+						return {
+							label: item.title,
+							value: item.title,
+							data: item
+						}
+					}));
+				}
+			});
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$("#pid").val(ui.item.data.id);
+		},
+		open: function() {
+			$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+		},
+		close: function() {
+			$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		}
 	});
 });
 </script>

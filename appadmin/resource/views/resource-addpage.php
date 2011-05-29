@@ -15,23 +15,26 @@
             </tr>
             <tr>
                 <th>Parent Resource:</th>
-                <td><input type="text" class="txt" name="p[pid]" value="<?=$this->item['pid']?>" /></td>
+                <td>
+                    <input type="text" class="txt" id="pid_ac" />
+                    <input type="hidden" id="pid" name="p[pid]" />
+                </td>
             </tr>
             <tr>
                 <th>Full Title:</th>
-                <td><input type="text" class="txt" readonly="readonly" value="<?=$this->item['full_title']?>" /></td>
+                <td><input type="text" class="txt" readonly="readonly" /></td>
             </tr>
             <tr>
                 <th>Title:</th>
-                <td><input type="text" class="txt" name="p[title]" v="required" value="<?=$this->item['title']?>" /></td>
+                <td><input type="text" class="txt" name="p[title]" v="required" /></td>
             </tr>
             <tr>
                 <th>Title EN:</th>
-                <td><input type="text" class="txt" name="p[title_en]" value="<?=$this->item['title_en']?>" /></td>
+                <td><input type="text" class="txt" name="p[title_en]" /></td>
             </tr>
             <tr>
                 <th>Title JP:</th>
-                <td><input type="text" class="txt" name="p[title_jp]" value="<?=$this->item['title_jp']?>" /></td>
+                <td><input type="text" class="txt" name="p[title_jp]" /></td>
             </tr>
             <tr>
                 <th>Cover:</th>
@@ -43,7 +46,7 @@
             </tr>
             <tr>
                 <th>Summary:</th>
-                <td><textarea id="summary" name="p[summary]"><?=$this->item['summary']?></textarea></td>
+                <td><textarea id="summary" name="p[summary]"></textarea></td>
             </tr>
         </table>
     </form>
@@ -57,7 +60,7 @@
 <script>
 $(function ()
 {
-	CKEDITOR.replace('summary');
+	var ckeditor = CKEDITOR.replace('summary');
 	
 	$.ajaxSetup({
 		global: false,
@@ -86,6 +89,8 @@ $(function ()
 	
 	$('#btn_save').click(function ()
 	{
+		$('#summary').val(ckeditor.getData());
+		
 		on_submit = function (data)
 		{
 			if (data.err_no)
@@ -139,6 +144,38 @@ $(function ()
 	{
 		uploader.upload();
 		return false;
+	});
+	
+	$("#pid_ac").autocomplete({
+		source: function( request, response ) {
+			$.ajax({
+				url: '<?=$this->buildUrl('ajaxparent','resource')?>',
+				dataType: "json",
+				data: {
+					maxRows: 12,
+					keyword: request.term
+				},
+				success: function( data ) {
+					response( $.map( data.content, function( item ) {
+						return {
+							label: item.title,
+							value: item.title,
+							data: item
+						}
+					}));
+				}
+			});
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$("#pid").val(ui.item.data.id);
+		},
+		open: function() {
+			$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+		},
+		close: function() {
+			$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		}
 	});
 });
 </script>

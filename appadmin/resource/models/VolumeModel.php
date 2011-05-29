@@ -56,9 +56,9 @@ class VolumeModel extends BaseModel
 		if (!empty($fields['cover']))
 		{
 			DirectoryUtils::copy_into(CACHE_PATH.'/'.$fields['cover'], COVER_PATH.date('/Y/m'), true);
+			$fields['cover'] = date('/Y/m/') . $fields['cover'];
 		}
 		
-		$fields['cover'] = date('/Y/m/') . $fields['cover'];
 		$fields['create_time'] = TimeUtils::db_time();
 		$fields['status'] = 0;
 		

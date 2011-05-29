@@ -42,6 +42,16 @@ class ResourceModel extends BaseModel
         return $ret;
     }
 	
+	public function search_for_complete ($keyword)
+	{
+		$select = $this->db->select()
+                ->from(DBTables::RESOURCE)
+				->where("title LIKE '$keyword%'")
+                ->order('create_time DESC');
+		
+		return $this->db->fetchAll($select);
+	}
+
 	public function get_path_arr ($id)
 	{
 		$select = $this->db->select()->from(DBTables::RESOURCE, 'path')->where('id=?', $id);
@@ -98,18 +108,23 @@ class ResourceModel extends BaseModel
 		if ('' !== $item['path'])
 		{
 			$ids = explode(',', $item['path']);
-			$select = $this->db->select()->from(DBTables::RESOURCE,array('id', 'title'))->where('id IN (?)', $ids);
+			$select = $this->db->select()->from(DBTables::RESOURCE)->where('id IN (?)', $ids);
 			$arr = array();
+			$arr_tmp = array();
 			$res = $this->db->query($select);
 			while ($a = $res->fetch())
 			{
 				$arr[$a['id']] = $a['title'];
+				$arr_tmp[$a['id']] = $a;
 			}
 			
 			foreach ($ids as $id)
 			{
 				$item['path_arr'][$id] = $arr[$id];
+				$item['parent'] = $arr_tmp[$id];
 			}
+			
+			unset($arr_tmp);
 		}
 		
 		return $item;
@@ -117,6 +132,12 @@ class ResourceModel extends BaseModel
 
 	public function add (array $fields)
 	{
+		if (!empty($fields['cover']))
+		{
+			DirectoryUtils::copy_into(CACHE_PATH.'/'.$fields['cover'], COVER_PATH.date('/Y/m'), true);
+			$fields['cover'] = date('/Y/m/') . $fields['cover'];
+		}
+		
 		if (!empty($fields['pid']))
 		{
 			$select = $this->db->select()

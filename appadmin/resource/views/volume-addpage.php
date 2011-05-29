@@ -21,7 +21,10 @@
             </tr>
             <tr>
                 <th>Parent Resource:</th>
-                <td><input type="text" class="txt" name="p[rid]" value="<?=HTMLUtils::pick_value($this->item['rid'],$this->resource['id'])?>" /><?=$this->resource['title']?></td>
+                <td>
+                	<input type="text" class="txt" id="rid_ac" value="<?=$this->resource['title']?>" />
+                    <input type="hidden" id="rid" name="p[rid]" value="<?=HTMLUtils::pick_value($this->item['rid'],$this->resource['id'])?>" />
+                </td>
             </tr>
             <tr>
                 <th>Title:</th>
@@ -59,7 +62,7 @@
 <script>
 $(function ()
 {
-	CKEDITOR.replace('summary');
+	var ckeditor = CKEDITOR.replace('summary');
 	
 	$.ajaxSetup({
 		global: false,
@@ -88,6 +91,8 @@ $(function ()
 	
 	$('#btn_save').click(function ()
 	{
+		$('#summary').val(ckeditor.getData());
+		
 		on_submit = function (data)
 		{
 			if (data.err_no)
@@ -141,6 +146,38 @@ $(function ()
 	{
 		uploader.upload();
 		return false;
+	});
+	
+	$("#rid_ac").autocomplete({
+		source: function( request, response ) {
+			$.ajax({
+				url: '<?=$this->buildUrl('ajaxparent','resource')?>',
+				dataType: "json",
+				data: {
+					maxRows: 12,
+					keyword: request.term
+				},
+				success: function( data ) {
+					response( $.map( data.content, function( item ) {
+						return {
+							label: item.title,
+							value: item.title,
+							data: item
+						}
+					}));
+				}
+			});
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$("#rid").val(ui.item.data.id);
+		},
+		open: function() {
+			$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+		},
+		close: function() {
+			$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		}
 	});
 });
 </script>
