@@ -26,7 +26,7 @@
             <th width="100">ID</th>
             <th width="100">PID</th>
             <th>Title</th>
-            <th width="120">Create Time</th>
+            <th width="150">Create Time</th>
             <th width="120">操作</th>
         </tr>
         <?php if (!$this->items):?>

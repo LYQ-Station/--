@@ -18,16 +18,32 @@
                 <td><input type="text" class="txt" name="p[pid]" value="<?=$this->item['pid']?>" /></td>
             </tr>
             <tr>
+                <th>Full Title:</th>
+                <td><input type="text" class="txt" readonly="readonly" value="<?=$this->item['full_title']?>" /></td>
+            </tr>
+            <tr>
                 <th>Title:</th>
                 <td><input type="text" class="txt" name="p[title]" v="required" value="<?=$this->item['title']?>" /></td>
             </tr>
             <tr>
+                <th>Title EN:</th>
+                <td><input type="text" class="txt" name="p[title_en]" value="<?=$this->item['title_en']?>" /></td>
+            </tr>
+            <tr>
+                <th>Title JP:</th>
+                <td><input type="text" class="txt" name="p[title_jp]" value="<?=$this->item['title_jp']?>" /></td>
+            </tr>
+            <tr>
                 <th>Cover:</th>
-                <td><input type="text" class="txt" name="p[cover_id]" value="<?=$this->item['cover_id']?>" /></td>
+                <td>
+                	<img class="cover" width="300" height="300" />
+                	<input type="hidden" name="p[cover]" value="" />
+                    <button id="upf_bsw">Upload</button>
+                </td>
             </tr>
             <tr>
                 <th>Summary:</th>
-                <td><textarea name="p[summary]"><?=$this->item['summary']?></textarea></td>
+                <td><textarea id="summary" name="p[summary]"><?=$this->item['summary']?></textarea></td>
             </tr>
         </table>
     </form>
@@ -35,10 +51,14 @@
 <?php $this->headLink()->appendStylesheet('/css/jquery.validationEngine.css');?>
 <?php $this->headScript()->appendFile('/js/jquery.ValidationEngineEx.js');?>
 <?php $this->headScript()->appendFile('/js/jquery.form.js');?>
+<?php $this->headScript()->appendFile('/js/lyq.Uploader.js');?>
+<?php $this->headScript()->appendFile('/plugins/ckeditor/ckeditor.js');?>
 <?=JsUtils::ob_start();?>
 <script>
 $(function ()
 {
+	CKEDITOR.replace('summary');
+	
 	$.ajaxSetup({
 		global: false,
 		type: "POST",
@@ -97,6 +117,27 @@ $(function ()
 		
 		f_submit();
 		
+		return false;
+	});
+	
+	var uploader = new Uploader({
+		url: '<?=$this->buildUrl('upload')?>',
+		callback: function (data)
+		{
+			if ('' != data.err_no)
+			{
+				alert(data.err_text);
+				return;
+			}
+			
+			form[0]['p[cover]'].value = data.content;
+			$('.cover').attr('src', '<?=$this->buildUrl('cover')?>?' + $.param({cover:data.content}));
+		}
+	});
+	
+	$('#upf_bsw').click(function ()
+	{
+		uploader.upload();
 		return false;
 	});
 });

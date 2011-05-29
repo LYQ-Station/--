@@ -1,10 +1,11 @@
 <?php
-define('EXT_URL', 'http://mc.dev');
+define('EXT_URL', 'http://admin.mc.dev');
 define('SITE_PATH', dirname($_SERVER['DOCUMENT_ROOT']));
 define('ETC_PATH', SITE_PATH.'/etc');
 define('APPS_PATH', SITE_PATH.'/appadmin');
 define('LIB_PATH', SITE_PATH.'/library');
 define('CACHE_PATH',SITE_PATH.'/cache');
+define('COVER_PATH',$_SERVER['DOCUMENT_ROOT'].'/cover');
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_USER_NOTICE);
 header('content-type: text/html;charset=utf-8');

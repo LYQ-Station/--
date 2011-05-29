@@ -83,6 +83,34 @@ class Resource_VolumeController extends BaseController
 		
 		AjaxUtils::json('ok');
 	}
+	
+	public function uploadAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$uploader = new FileUploader('IMAGE');
+		
+		try
+		{
+			$file = $uploader->upload('upload', CACHE_PATH);
+			AjaxUtils::json($file['file_name']);
+		}
+		catch (FileUploaderException $e)
+		{
+			AjaxUtils::json_err(1, $e->getMessage());
+		}
+	}
+	
+	public function coverAction ()
+	{
+		$this->_helper->layout->disableLayout();
+		
+		$img_file = $this->_request->cover;
+		
+		$img_file = CACHE_PATH . '/' . $img_file;
+		
+		NetUtils::render_image($img_file);
+	}
 
 	public function searchfieldsAction ()
     {

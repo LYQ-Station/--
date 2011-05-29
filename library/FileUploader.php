@@ -1,9 +1,5 @@
 <?php
 
-/*
- * 附件上传类
- * 
- */
 class FileUploaderException extends Exception
 {
     const ERR_EMPTY_EXT     = '没有指定可上传的文件后缀';
@@ -21,6 +17,10 @@ class FileUploaderException extends Exception
     }
 }
 
+/**
+ * 附件上传类
+ * 
+ */
 class FileUploader
 {
     protected static $EXT = array(
@@ -70,6 +70,7 @@ class FileUploader
 
     /**
      * 上传文件
+	 * 
      * @param string $type 上传文件类型
      * @param string $extend_type 附加类型,用逗号间隔
      * @param string $deny_type 不允许的上传类型,用逗号间隔
@@ -114,7 +115,7 @@ class FileUploader
         $des_dir = preg_replace('/[\/\\\]+$/', '', $des_dir);
         $des_file = $des_dir . '/' . $new_name;
         
-        if (!move_uploaded_file($_FILES[$file]['tmp_name'], $des_file))
+        if (!@move_uploaded_file($_FILES[$file]['tmp_name'], $des_file))
         {
             throw new FileUploaderException(FileUploaderException::ERR_MOVE);
         }

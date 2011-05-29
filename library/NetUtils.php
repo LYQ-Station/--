@@ -79,8 +79,34 @@ class NetUtils
 
         return true;
     }
+	
+	/**
+	 * 向浏览器输出图片
+	 *
+	 * @param string $img_file 
+	 */
+	static public function render_image ($img_file)
+	{
+		if (!is_file($img_file))
+            throw new Exception('不是文件');
 
-    /**
+        if (!is_readable($img_file))
+            throw new Exception('无权读取');
+
+        if (headers_sent())
+            throw new Exception('Header已经发出');
+
+        $fp = fopen($img_file, 'r');
+        if (!$fp)
+            throw new Exception('无法打开文件');
+		
+		$attr = getimagesize($img_file);
+		header("Content-Type: {$attr['mime']}");
+		
+		echo file_get_contents($img_file);
+	}
+
+	/**
      * 将子网掩码十六进制转化成十进制的形式
      *
      * @param string $netmask

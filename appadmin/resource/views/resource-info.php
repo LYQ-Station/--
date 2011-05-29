@@ -29,16 +29,28 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Parent Resource:</th>
+                <th>Parent Resource:</th>
                     <td><input type="text" class="txt" name="p[pid]" value="<?=$this->item['pid']?>" /></td>
+                </tr>
+                <tr>
+                    <th>Full Title:</th>
+                    <td><input type="text" class="txt" readonly="readonly" value="<?=$this->item['full_title']?>" /></td>
                 </tr>
                 <tr>
                     <th>Title:</th>
                     <td><input type="text" class="txt" name="p[title]" v="required" value="<?=$this->item['title']?>" /></td>
                 </tr>
                 <tr>
+                    <th>Title EN:</th>
+                    <td><input type="text" class="txt" name="p[title_en]" value="<?=$this->item['title_en']?>" /></td>
+                </tr>
+                <tr>
+                    <th>Title JP:</th>
+                    <td><input type="text" class="txt" name="p[title_jp]" value="<?=$this->item['title_jp']?>" /></td>
+                </tr>
+                <tr>
                     <th>Cover:</th>
-                    <td><input type="text" class="txt" name="p[cover_id]" value="<?=$this->item['cover_id']?>" /></td>
+                    <td><input type="text" class="txt" name="p[cover]" value="<?=$this->item['cover']?>" /></td>
                 </tr>
                 <tr>
                     <th>Summary:</th>
