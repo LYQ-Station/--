@@ -1,7 +1,7 @@
 <div class="page_head">
-    <div class="page_title">标签列表</div>
+    <div class="page_title">Tags list</div>
     <div class="page_nav">
-    	<button id="btn_add">新建</button>
+    	<button id="btn_add">new</button>
     	<a href="<?=$this->buildUrl('list')?>">All</a>
     	<a href="<?=$this->buildUrl('list',null,null,array('c'=>SearchFilter::encode('status<>0')))?>">Disabled</a>
     </div>
@@ -31,7 +31,7 @@
             <td width="25"><input type="checkbox" /></td>
             <td><?=$item['id']?></td>
             <td><?=$item['tag']?></td>
-            <td><?=$item['crate_tiem']?></td>
+            <td><?=$item['create_time']?></td>
             <td width="120" class="op">
             	<a href="#" class="a_dis" lang="<?=$item['id']?>" status="<?=$item['status']?>"><?=HTMLUtils::pick_value2($item['status'],'Enable','Disable')?></a>
                 <a href="#" class="a_del" lang="<?=$item['id']?>">Del</a>

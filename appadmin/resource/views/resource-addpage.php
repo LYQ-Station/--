@@ -39,9 +39,17 @@
             <tr>
                 <th>Cover:</th>
                 <td>
-                	<img class="cover" width="300" height="300" />
+                	<img class="cover" width="300" height="300" style="display:none" />
                 	<input type="hidden" name="p[cover]" value="" />
                     <button id="upf_bsw">Upload</button>
+                </td>
+            </tr>
+            <tr>
+            	<th>Tags</th>
+                <td>
+                	<div id="tags"></div>
+                    <button id="tags_picker">Mark Tags</button>
+                    <input type="hidden" name="tags" />
                 </td>
             </tr>
             <tr>
@@ -55,6 +63,7 @@
 <?php $this->headScript()->appendFile('/js/jquery.ValidationEngineEx.js');?>
 <?php $this->headScript()->appendFile('/js/jquery.form.js');?>
 <?php $this->headScript()->appendFile('/js/lyq.Uploader.js');?>
+<?php $this->headScript()->appendFile('/js/egt.DialogEx.js');?>
 <?php $this->headScript()->appendFile('/plugins/ckeditor/ckeditor.js');?>
 <?=JsUtils::ob_start();?>
 <script>
@@ -125,6 +134,7 @@ $(function ()
 		return false;
 	});
 	
+	//--------------------------------------------------------------------------------------------
 	var uploader = new Uploader({
 		url: '<?=$this->buildUrl('upload')?>',
 		callback: function (data)
@@ -137,6 +147,7 @@ $(function ()
 			
 			form[0]['p[cover]'].value = data.content;
 			$('.cover').attr('src', '<?=$this->buildUrl('cover')?>?' + $.param({cover:data.content}));
+			$('.cover').show();
 		}
 	});
 	
@@ -146,6 +157,7 @@ $(function ()
 		return false;
 	});
 	
+	//--------------------------------------------------------------------------------------------
 	$("#pid_ac").autocomplete({
 		source: function( request, response ) {
 			$.ajax({
@@ -175,6 +187,94 @@ $(function ()
 		},
 		close: function() {
 			$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		}
+	});
+	
+	//--------------------------------------------------------------------------------------------
+	$('#tags_picker').click(function ()
+	{
+		tags_picker.dialog.open_modal();
+		
+		return false;
+	});
+	
+	var TagsPicker = function (elem, options)
+	{
+		elem = $('#'+elem);
+		if (!elem.length)
+			return;
+		
+		var self = this;
+			
+		this.elem = elem;
+		this.options = options || {};
+		
+		this.data = [];
+		
+		this.dialog = new DialogEx('<?=$this->buildUrl('popuptag','index','tag')?>', {
+			features: 'width=700,height=500',
+			events: {
+				'submit': function (evn, data)
+				{
+					for (var p in data)
+					{
+						self.data.push(data[p]);
+					}
+					
+					self.reset_items();
+				}
+			}
+		});
+		
+		if (this.options.events)
+		{
+			for (var e in this.options.events)
+			{
+				$(this).bind(e, this, this.options.events[e]);
+			}	
+		}
+	}
+	
+	TagsPicker.prototype.reset_items = function ()
+	{
+		var span = null;
+		var a = null;
+		var self = this;
+		
+		for (var p in this.data)
+		{
+			span = null;
+			a = null;
+			
+			span = $('<span>' + this.data[p].tag + '</span>');
+			a = $('<a href="#">X</a>');
+			span.append(a);
+			this.elem.append(span);
+			a.bind('click', function ()
+			{
+				document.title = p;
+				self.data.slice(p,1);
+				window['xx'] = self.data;
+				
+				$(this.parentNode).remove();
+			}); 
+		}
+		
+		$(this).trigger('change', [this.data]);
+	}
+	
+	var tags_picker = new TagsPicker('tags', {
+		events: {
+			select: function (evn, data)
+			{
+				var ids = [];
+				for (var p in data)
+				{
+					ids.push(data[p].id);
+				}
+				
+				$('#tags').val(ids);
+			}
 		}
 	});
 });
