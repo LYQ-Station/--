@@ -36,15 +36,6 @@
         </li>
     </ul>
     
-    <!--<ul>
-        <li><span>公告管理</span>
-            <ul class="sub">
-                <li><a href="#">发布公告</a></li>
-                <li><a href="#">所有公告列表</a></li>
-            </ul>
-        </li>
-    </ul>-->
-    
     <ul>
         <li><span>日志管理</span>
             <ul class="sub">
@@ -67,11 +58,12 @@
                     </ul>
                 </li>-->
                 
-                <li><span>通用设置</span>
+                <li><span>权限设置</span>
                     <ul class="sub">
-                        <li><a href="<?=$this->buildUrl('index','keywordsfilter','setting')?>">用户文本关键字（词）过滤设置</a></li>
-                        <li><a href="<?=$this->buildUrl('index','image','setting')?>">用户发布图片设置</a></li>
-                        <li><a href="<?=$this->buildUrl('index','video','setting')?>">用户发布音乐设置</a></li>
+                        <li><a href="<?=$this->buildUrl('index','group','acl')?>">组织架构权限树</a></li>
+                        <li><a href="<?=$this->buildUrl('index','permit','acl')?>">权限列表</a></li>
+						<li><a href="<?=$this->buildUrl('index','role','acl')?>">角色</a></li>
+                        <li><a href="<?=$this->buildUrl('index','user','acl')?>">用户</a></li>
                     </ul>
                 </li>
         

@@ -1,5 +1,4 @@
 <?php
-define('EXT_URL', 'http://192.168.10.7:8080');
 define('SITE_PATH', dirname($_SERVER['DOCUMENT_ROOT']));
 define('ETC_PATH', SITE_PATH.'/etc');
 define('APPS_PATH', SITE_PATH.'/appmc');
@@ -66,5 +65,5 @@ $fc->getRouter()->addRoute(
 	)
 );
 
-//$fc->registerPlugin(new AuthPlugin());
+$fc->registerPlugin(new AuthPlugin());
 $fc->dispatch();

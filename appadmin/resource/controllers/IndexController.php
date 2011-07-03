@@ -39,6 +39,11 @@ class Resource_IndexController extends BaseController
 		$this->render('resource-list');
 	}
 	
+	public function addAction ()
+	{
+		
+	}
+	
 	public function addpageAction ()
 	{
 		
