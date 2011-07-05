@@ -12,7 +12,6 @@
     <div class="page_nav">
     	<button id="btn_new">新增</button>
         <button id="btn_edit">编辑</button>
-        <button id="btn_cv" link="<?=$this->buildUrl('addpage','volume',null,array('rid'=>$this->item['id']))?>">Create new volume</button>
     	<a href="<?=$this->buildUrl('list')?>">Cancel</a>
     </div>
 </div>
@@ -31,6 +30,7 @@
                 <td class="r">上级组：</td>
                 <td>
                 	<select name="p[pid]">
+						<option value="0">- 顶级 -</option>
                     	<?=$this->grp_options?>
                     </select>
                 </td>
