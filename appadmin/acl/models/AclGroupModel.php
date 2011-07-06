@@ -30,9 +30,17 @@ class AclGroupModel extends BaseModel
 
     public function add ($group)
     {
+		if (0 >= $group['id'] || 254 < $group['id'])
+		{
+			throw new Exception('编号只能在1~254之间', 1001);
+		}
+		
 		if (empty($group['pid']))
 		{
 			$group['pid'] = 0;
+			$group['code'] = sprintf('%064x', 0x1<<32);
+//			$group['code'] = sprintf('%064x', decbin($group['id']));
+//			$group['code'] = dechex($group['id']);
 		}
 		else
 		{
@@ -44,11 +52,27 @@ class AclGroupModel extends BaseModel
 			
 			if (!$p_group)
 			{
-				throw new Exception('无效的父类别', 1002);
+				throw new Exception('无效的父类别', 1001);
 			}
+			
+			$depth = count(explode('/', $p_group['path']));
+			$group['code'] = sprintf('%064x', (dechex($group['id'])>>$depth)^$p_group['code']);
+//			$group['code'] = (dechex($group['id'])>>$depth)^$p_group['code'];
 		}
 		
-        $this->db->insert(ACLTables::ACL_GROUP, $group);
+		echo $group['code'];
+		exit;
+		
+		if ($depth >= 32)
+		{
+			throw new Exception('组层级不能超过32层', 1002);
+		}
+		
+		unset($group['id']);
+		
+		$sql = 'INSERT INTO '.ACLTables::ACL_GROUP.' SET pid=:pid,code=UNHEX(:code),name=:name,notes=:notes';
+		$this->db->query($sql, $group);
+//        $this->db->insert(ACLTables::ACL_GROUP, $group);
 		
 		$gid = $this->db->lastInsertId();
 		
@@ -60,7 +84,9 @@ class AclGroupModel extends BaseModel
 		{
 			$group['path'] = "{$p_group['path']}/$gid";
 		}
-
+		
+		unset($group['code']);
+		
 		$this->db->update(ACLTables::ACL_GROUP, $group, $this->db->quoteInto('id=?', $gid));
     }
 
