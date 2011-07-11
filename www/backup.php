@@ -132,8 +132,8 @@ class LYQMysqlBackup
 				throw new Exception(mysql_error(), 3003);
 			}
 			
-			$table_create_syntax = str_repeat('--', '10') . "\n-- $table";
-			$table_create_syntax = end(mysql_fetch_row($res));
+			$table_create_syntax = str_repeat('--', '10') . "\n-- struct $table\n";
+			$table_create_syntax .= end(mysql_fetch_row($res)) . ";\n\n-- data\n";
 			fwrite($fp, $table_create_syntax);
 		}
 		
@@ -152,12 +152,32 @@ class LYQMysqlBackup
 			return 0;
 		}
 		
-		$tmp = "INSER INTO `$table` VALUES (";
-		while ($arr = mysql_fetch_array($res))
-		{
-			$tmp .= '"' . join('","', $arr) . '"';
-		}
-		$tmp .= ');';
+        fwrite($fp, "INSER INTO `$table` VALUES ");
+        
+        $tmp = null;
+        
+        do
+        {
+            if ($tmp)
+            {
+                fwrite($fp, $tmp);
+            }
+            
+            $arr = mysql_fetch_array($res);
+            if ($arr)
+            {
+                $tmp = '("' . join('","', $arr) . '"),';
+            }
+            else
+            {
+                $tmp = substr_replace($tmp, '', -1, 1);
+                fwrite($fp, $tmp);
+                break;
+            }
+        }
+        while (true);
+        
+		$tmp .= ';';
 		
 		fwrite($fp, $tmp);
 		fclose($fp);
@@ -288,14 +308,19 @@ class DBBackupProcesser extends LYQProcesser
 		session_start();
 	}
 
-
+    public function act_createsession ()
+	{
+		session_start();
+		$this->response(session_id());
+	}
+    
 	public function act_test ()
 	{
 		$server_account = array(
 			'host'		=> 'localhost',
 			'username'	=> 'root',
 			'password'	=> '',
-			'dbname'	=> 'mobile_cartoon'
+			'dbname'	=> 'test'
 		);
 		
 		LYQMysqlBackup::test_content($server_account);
@@ -304,12 +329,6 @@ class DBBackupProcesser extends LYQProcesser
 		$_SESSION['server_account'] = $server_account;
 		
 		$this->response('ok');
-	}
-	
-	public function act_createsession ()
-	{
-		session_start();
-		$this->response(session_id());
 	}
 	
 	public function act_gettables ()
