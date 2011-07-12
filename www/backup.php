@@ -108,7 +108,13 @@ class LYQMysqlBackup
 		
 		while ($arr = mysql_fetch_assoc($res))
 		{
-			$ret_arr[] = $arr;
+			$ret_arr[] = array(
+				'Name'		=> $arr['Name'],
+				'Engine'	=> $arr['Engine'],
+				'Rows'		=> $arr['Rows'],
+				'Comment'	=> $arr['Comment'],
+				'CreateTime'=> $arr['Create_time']
+			);
 		}
 		
 		return $ret_arr;
@@ -299,9 +305,13 @@ class DBBackupProcesser extends LYQProcesser
 	{
 		if ('act_createsession' != $action)
 		{
-			if ('' == $_COOKIE['PHPSESSID'])
+			if ('' == $_REQUEST['PHPSESSID'])
 			{
-				throw new Exception('未初始化令牌');
+				throw new Exception('未初始化令牌', 9002);
+			}
+			else
+			{
+				session_id($_REQUEST['PHPSESSID']);
 			}
 		}
 		
@@ -320,7 +330,7 @@ class DBBackupProcesser extends LYQProcesser
 			'host'		=> 'localhost',
 			'username'	=> 'root',
 			'password'	=> '',
-			'dbname'	=> 'test'
+			'dbname'	=> 'mobile_cartoon'
 		);
 		
 		LYQMysqlBackup::test_content($server_account);
