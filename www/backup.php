@@ -108,6 +108,11 @@ class LYQMysqlBackup
 		
 		while ($arr = mysql_fetch_assoc($res))
 		{
+			if (empty($arr['Engine']))
+			{
+				continue;
+			}
+			
 			$ret_arr[] = array(
 				'Name'		=> $arr['Name'],
 				'Engine'	=> $arr['Engine'],
@@ -122,7 +127,7 @@ class LYQMysqlBackup
 
 	public function backup ($bk_file, $table, $start_id = 0)
 	{
-		$fp = fopen($bk_file, 'w+');
+		$fp = fopen($bk_file, 'a+');
 		if (!$fp)
 		{
 			throw new Exception('无法建立备份文件', 5001);
@@ -138,7 +143,7 @@ class LYQMysqlBackup
 				throw new Exception(mysql_error(), 3003);
 			}
 			
-			$table_create_syntax = str_repeat('--', '10') . "\n-- struct $table\n";
+			$table_create_syntax = "\n\n" . str_repeat('--', '10') . "\n-- struct $table\n";
 			$table_create_syntax .= end(mysql_fetch_row($res)) . ";\n\n-- data\n";
 			fwrite($fp, $table_create_syntax);
 		}
@@ -158,7 +163,7 @@ class LYQMysqlBackup
 			return 0;
 		}
 		
-        fwrite($fp, "INSER INTO `$table` VALUES ");
+        fwrite($fp, "\nINSER INTO `$table` VALUES ");
         
         $tmp = null;
         
@@ -183,9 +188,7 @@ class LYQMysqlBackup
         }
         while (true);
         
-		$tmp .= ';';
-		
-		fwrite($fp, $tmp);
+		fwrite($fp, ';');
 		fclose($fp);
 		
 		if (3000 > mysql_num_rows($res))
@@ -326,13 +329,12 @@ class DBBackupProcesser extends LYQProcesser
     
 	public function act_test ()
 	{
-		/*
-		$server_account = array(
-			'host'		=> 'localhost',
-			'username'	=> 'root',
-			'password'	=> '',
-			'dbname'	=> 'mobile_cartoon'
-		);*/
+//		$server_account = array(
+//			'host'		=> 'localhost',
+//			'username'	=> 'root',
+//			'password'	=> '',
+//			'dbname'	=> 'mobile_cartoon'
+//		);
 
 		$server_account = array(
 			'host'		=> $this->get_request('host'),
@@ -371,7 +373,9 @@ class DBBackupProcesser extends LYQProcesser
 			throw new Exception('请指定表名', 9003);
 		}
 		
-		if (0 === $backuper->backup($server_account['bk_file'], $table, $start_id))
+		$rows_backuped = $backuper->backup($server_account['bk_file'], $table, $start_id);
+		
+		if (0 === $rows_backuped)
 		{
 				//表备份完毕
 			$this->response_xml(100, null, null);
@@ -379,7 +383,7 @@ class DBBackupProcesser extends LYQProcesser
 		else
 		{
 				//段备份完毕
-			$this->response_xml(101, null, null);
+			$this->response_xml(101, $rows_backuped, null);
 		}
 	}
 }
