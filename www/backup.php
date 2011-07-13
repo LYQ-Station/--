@@ -193,7 +193,7 @@ class LYQMysqlBackup
 			return 0;
 		}
 		
-		return 1;
+		return $affected_rows;
 	}
 }
 
@@ -326,11 +326,19 @@ class DBBackupProcesser extends LYQProcesser
     
 	public function act_test ()
 	{
+		/*
 		$server_account = array(
 			'host'		=> 'localhost',
 			'username'	=> 'root',
 			'password'	=> '',
 			'dbname'	=> 'mobile_cartoon'
+		);*/
+
+		$server_account = array(
+			'host'		=> $this->get_request('host'),
+			'username'	=> $this->get_request('username'),
+			'password'	=> $this->get_request('password'),
+			'dbname'	=> $this->get_request('dbname')
 		);
 		
 		LYQMysqlBackup::test_content($server_account);
@@ -360,7 +368,7 @@ class DBBackupProcesser extends LYQProcesser
 		
 		if (empty($table))
 		{
-			throw new Exception('请指定表名');
+			throw new Exception('请指定表名', 9003);
 		}
 		
 		if (0 === $backuper->backup($server_account['bk_file'], $table, $start_id))
