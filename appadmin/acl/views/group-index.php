@@ -31,10 +31,6 @@
                     </select>
                 </td>
             </tr>
-			<tr>
-                <td class="r">编号：</td>
-                <td><input id="group_name" type="text" name="p[id]" />*1~254之间</td>
-            </tr>
             <tr>
                 <td class="r">组名：</td>
                 <td><input id="group_name" type="text" name="p[name]" /></td>

@@ -5,8 +5,8 @@
  * 此脚本可以配合其它客户端使用，前提是使用统一的调度协议
  * 这些协议包括测试、连接、取得表、备份表，每个操作都有特定的返回值，只要适当的调度及分析返回值就能进行备份任务了
  * 
- * @author Steven
- * @date 2011-7-10
+ * @author StevenLi
+ * @date 2011-07-10
  */
 
 /**
@@ -14,6 +14,12 @@
  */
 class LYQMysqlBackup
 {
+	/**
+	 * 备份用的临时文件所在目录，确保可删写
+	 * 为了安全起见，最好单独建立一个666的目录作临时目录
+	 */
+	const BACKUP_DIRECTORY		= '../cache/';
+	
 	private $conn_id;
 	
 	private $server_account;
@@ -24,13 +30,14 @@ class LYQMysqlBackup
 		
 		if (!$conn_id)
 		{
-			throw new Exception(mysql_error(), 1001);
+			throw new Exception('无法连接数据库，可能是服务器未开启或提供的用户名或密码错误', 1001);
 		}
 		
 		if (!@mysql_select_db($server_account['dbname']))
 		{
+			//$err_txt = mysql_error($conn_id);
 			mysql_close($conn_id);
-			throw new Exception(mysql_error(), 1002);
+			throw new Exception("{$server_account['dbname']}数据库不存在", 1002);
 		}
 		
 		mysql_close($conn_id);
@@ -38,7 +45,7 @@ class LYQMysqlBackup
 	
 	static public function test_write_backupfile ()
 	{
-		$backupfile_name = '../cache/lyqmysqlbackup_'.time();
+		$backupfile_name = self::BACKUP_DIRECTORY . 'lyqmysqlbackup_' . time();
 		
 		if (is_file($backupfile_name))
 		{
@@ -53,6 +60,7 @@ class LYQMysqlBackup
 		}
 
 		fclose($fp);
+		unlink($backupfile_name);
 		
 		return $backupfile_name;
 	}
@@ -98,10 +106,10 @@ class LYQMysqlBackup
 	public function get_tables ()
 	{
 		$sql = 'SHOW TABLE STATUS';
-		$res = mysql_query($sql);
+		$res = mysql_query($sql, $this->conn_id);
 		if (!$res)
 		{
-			throw new Exception(mysql_error(), 3002);
+			throw new Exception(mysql_error($this->conn_id), 3002);
 		}
 		
 		$ret_arr = array();
@@ -136,11 +144,11 @@ class LYQMysqlBackup
 		if (0 == $start_id)
 		{
 			$sql = "SHOW CREATE TABLE `$table`";
-			$res = @mysql_query($sql);
+			$res = @mysql_query($sql, $this->conn_id);
 			
 			if (!$res)
 			{
-				throw new Exception(mysql_error(), 3003);
+				throw new Exception(mysql_error($this->conn_id), 3003);
 			}
 			
 			$table_create_syntax = "\n\n" . str_repeat('--', '10') . "\n-- struct $table\n";
@@ -153,7 +161,7 @@ class LYQMysqlBackup
 		
 		if (!$res)
 		{
-			throw new Exception(mysql_error(), 3003);
+			throw new Exception(mysql_error($this->conn_id), 3003);
 		}
 		
 		$affected_rows = mysql_num_rows($res);
@@ -197,6 +205,67 @@ class LYQMysqlBackup
 		}
 		
 		return $affected_rows;
+	}
+	
+	public function send_file ($bk_file)
+	{
+		$filesize = sprintf("%u", filesize($bk_file));
+        if (!$filesize)
+        {
+			throw new Exception('文件无法发送', 5001);
+        }
+		
+		header("Content-type:application/octet-stream");
+        header("Content-disposition: attachment; filename=\"".$bk_file."\"");
+        header('Content-transfer-encoding: binary');
+		
+		$range = getenv('HTTP_RANGE');
+		if ($range)
+        {
+			$range = explode('=', $range);
+			$range = $range[1];
+
+			header("HTTP/1.1 206 Partial Content");
+			header("Date: " . gmdate("D, d M Y H:i:s") . " GMT");
+			header("Last-Modified: ".gmdate("D, d M Y H:i:s", filemtime($url))." GMT");
+			header("Accept-Ranges: bytes");
+			header("Content-Length:".($filesize - $range));
+			header("Content-Range: bytes ".$range.($filesize-1)."/".$filesize);
+			header("Connection: close\n\n");
+        }
+        else
+        {
+			header("Content-Length:".$filesize."\n\n");
+			$range = 0;
+        }
+		
+		$buffer = '';
+        $cnt =0;       
+        $handle = fopen($bk_file, 'rb');
+        if ($handle === false)
+		{
+			return false;
+        }
+        while (!feof($handle))
+		{
+			$buffer = fread($handle, 1024*1024);
+			echo $buffer;
+			ob_flush();
+			flush();
+			if ($retbytes)
+			{
+				$cnt += strlen($buffer);
+			}
+        }
+		
+        $status = fclose($handle);
+		
+        if ($retbytes && $status)
+		{
+			return $cnt;
+        }
+		
+		return $status;
 	}
 }
 
@@ -378,12 +447,19 @@ class DBBackupProcesser extends LYQProcesser
 		if (0 === $rows_backuped)
 		{
 				//表备份完毕
-			$this->response_xml(100, null, null);
+			$this->response_xml(100, $server_account['bk_file'], null);
 		}
 		else
 		{
 				//段备份完毕
 			$this->response_xml(101, $rows_backuped, null);
 		}
+	}
+	
+	public function act_download ()
+	{
+		$server_account = $_SESSION['server_account'];
+		$backuper = new LYQMysqlBackup($server_account);
+		$backuper->send_file($server_account['bk_file']);
 	}
 }
