@@ -61,7 +61,7 @@
                 <li><span>权限设置</span>
                     <ul class="sub">
                         <li><a href="<?=$this->buildUrl('index','group','acl')?>">组织架构权限树</a></li>
-                        <li><a href="<?=$this->buildUrl('index','permit','acl')?>">权限列表</a></li>
+                        <li><a href="<?=$this->buildUrl('index','permitbasic','acl')?>">权限列表</a></li>
 						<li><a href="<?=$this->buildUrl('index','role','acl')?>">角色</a></li>
                         <li><a href="<?=$this->buildUrl('index','user','acl')?>">用户</a></li>
                     </ul>

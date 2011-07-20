@@ -30,11 +30,6 @@ class AclGroupModel extends BaseModel
 
     public function add ($group)
     {
-//		if (0 >= $group['id'] || 254 < $group['id'])
-//		{
-//			throw new Exception('编号只能在1~254之间', 1001);
-//		}
-		
 		if (empty($group['pid']))
 		{
 			$group['pid'] = 0;
@@ -55,9 +50,9 @@ class AclGroupModel extends BaseModel
 			$depth = count(explode('/', $p_group['path']));
 		}
 		
-		if ($depth >= 32)
+		if ($depth >= 64)
 		{
-			throw new Exception('组层级不能超过32层', 1002);
+			throw new Exception('组层级不能超过64层', 1002);
 		}
 		
         $this->db->insert(ACLTables::ACL_GROUP, $group);
