@@ -15,7 +15,7 @@ class Acl_PermitbasicController extends BaseController
 	
 	public function indexAction ()
 	{
-		$this->view->treeview = $this->model->get_list();
+		$this->view->treeview = $this->model->get_tree('123');
 		
 		$this->render('premit-basic-index');
 	}
