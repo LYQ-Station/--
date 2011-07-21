@@ -41,13 +41,14 @@ class TreeView
 	{
 		$chd_arr = array();
 		
-		for ($i = 0; $i < count($this->og_arr); $i++)
+		foreach ($this->og_arr as $arr)
 		{
-			if ($this->og_arr[$i][$this->pid_field] == $node_id)
+			if ($arr[$this->pid_field] == $node_id)
 			{
-				$chd_arr[] = $this->og_arr[$i];
+				$chd_arr[] = $arr;
 			}
 		}
+		
 		return $chd_arr;
 	}
 	
