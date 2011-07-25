@@ -7,9 +7,23 @@
  */
 class ACLPermitbasicModel extends BaseModel
 {
-	public function get_list ()
+	public function get_list ($model_sn = null, $page_no = 1)
 	{
+		$select = $this->db->select()->from(ACLTables::ACL_PERMIT_BASIC)->order('code');
 		
+		if ($model_sn)
+		{
+			$select->where('module_sn=?', $model_sn);
+		}
+		
+		$pager = new Pager($this->db, $select);
+        $sql = $pager->get_page($page_no);
+		
+		$ret = new stdClass();
+        $ret->data = $this->db->fetchAll($sql);
+        $ret->pager = $pager;
+        
+        return $ret;
 	}
 	
 	public function get_tree ($model_sn)

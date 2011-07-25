@@ -133,7 +133,7 @@ class LYQMysqlBackup
 		return $ret_arr;
 	}
 
-	public function backup ($bk_file, $table, $start_id = 0)
+	public function backup ($bk_file, $table, $start_id = 0, $include = 0)
 	{
 		$fp = fopen($bk_file, 'a+');
 		if (!$fp)
@@ -143,17 +143,29 @@ class LYQMysqlBackup
 		
 		if (0 == $start_id)
 		{
-			$sql = "SHOW CREATE TABLE `$table`";
-			$res = @mysql_query($sql, $this->conn_id);
-			
-			if (!$res)
+			if (1 == $include || 2 == $include)
 			{
-				throw new Exception(mysql_error($this->conn_id), 3003);
+				$sql = "SHOW CREATE TABLE `$table`";
+				$res = @mysql_query($sql, $this->conn_id);
+
+				if (!$res)
+				{
+					throw new Exception(mysql_error($this->conn_id), 3003);
+				}
+
+				$table_create_syntax = "\n\n#" . str_repeat('--', '10') . "\n#-- struct $table\n";
+				$table_create_syntax .= "DROP TABLE IF EXISTS `$table`;\n";
+				$table_create_syntax .= end(mysql_fetch_row($res)) . ";";
+				fwrite($fp, $table_create_syntax);
+				
+				if (1 == $include)
+				{
+					fclose($fp);
+					return 0;
+				}
 			}
 			
-			$table_create_syntax = "\n\n" . str_repeat('--', '10') . "\n-- struct $table\n";
-			$table_create_syntax .= end(mysql_fetch_row($res)) . ";\n\n-- data\n";
-			fwrite($fp, $table_create_syntax);
+			fwrite($fp, "\n\n#-- data $table\n");
 		}
 		
 		$sql = "SELECT * FROM `$table` LIMIT $start_id, 3000";
@@ -171,7 +183,7 @@ class LYQMysqlBackup
 			return 0;
 		}
 		
-        fwrite($fp, "\nINSER INTO `$table` VALUES ");
+        fwrite($fp, "\nINSERT INTO `$table` VALUES ");
         
         $tmp = null;
         
@@ -182,17 +194,19 @@ class LYQMysqlBackup
                 fwrite($fp, $tmp);
             }
             
-            $arr = mysql_fetch_array($res);
+            
             if ($arr)
             {
                 $tmp = '("' . join('","', $arr) . '"),';
             }
-            else
-            {
-                $tmp = substr_replace($tmp, '', -1, 1);
+			
+			$arr = mysql_fetch_row($res);
+			if (!$arr)
+			{
+				$tmp = substr_replace($tmp, '', -1, 1);
                 fwrite($fp, $tmp);
                 break;
-            }
+			}
         }
         while (true);
         
@@ -240,32 +254,31 @@ class LYQMysqlBackup
         }
 		
 		$buffer = '';
-        $cnt =0;       
-        $handle = fopen($bk_file, 'rb');
+        $cnt = 0;       
+        $handle = @fopen($bk_file, 'rb');
         if ($handle === false)
 		{
-			return false;
+			throw new Exception('文件无法发送', 5002);
         }
-        while (!feof($handle))
+		
+		if ($range)
 		{
+			fseek($handle, $range);
+		}
+		
+        while (true)
+		{
+			if (feof($handle))
+			{
+				fclose($handle);
+				return 2;
+			}
+			
 			$buffer = fread($handle, 1024*1024);
 			echo $buffer;
-			ob_flush();
-			flush();
-			if ($retbytes)
-			{
-				$cnt += strlen($buffer);
-			}
         }
 		
-        $status = fclose($handle);
-		
-        if ($retbytes && $status)
-		{
-			return $cnt;
-        }
-		
-		return $status;
+        fclose($handle);
 	}
 }
 
@@ -435,14 +448,15 @@ class DBBackupProcesser extends LYQProcesser
 		$backuper = new LYQMysqlBackup($server_account);
 		
 		$table = $this->get_request('table');
-		$start_id = intval($this->get_request('startid'));
+		$start_id = intval($this->get_request('start_id'));
+		$include = intval($this->get_request('include_type'));
 		
 		if (empty($table))
 		{
 			throw new Exception('请指定表名', 9003);
 		}
 		
-		$rows_backuped = $backuper->backup($server_account['bk_file'], $table, $start_id);
+		$rows_backuped = $backuper->backup($server_account['bk_file'], $table, $start_id, $include);
 		
 		if (0 === $rows_backuped)
 		{
@@ -460,6 +474,9 @@ class DBBackupProcesser extends LYQProcesser
 	{
 		$server_account = $_SESSION['server_account'];
 		$backuper = new LYQMysqlBackup($server_account);
-		$backuper->send_file($server_account['bk_file']);
+		if (2 == $backuper->send_file($server_account['bk_file']))
+		{
+			unlink($server_account['bk_file']);
+		}
 	}
 }
