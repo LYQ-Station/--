@@ -83,6 +83,7 @@ input.datepicker {
 
 .page_body_b {
     bottom: 0;
+	overflow:hidden;
 }
 
 .page_foot {
@@ -225,3 +226,77 @@ input.datepicker {
 	color:red;
 	text-decoration:underline;
 }
+
+/* base grid */
+.base-grid {
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+}
+
+.base-grid div.thead {
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	height:30px;
+	background-color:#eee;
+	line-height:29px;
+	border-bottom: 1px #eee solid;
+	overflow:hidden;
+}
+
+.base-grid div.tbody {
+	position:absolute;
+	top:31px;
+	left:0;
+	right:0;
+	bottom:28px;
+	line-height:26px;
+	overflow:auto;
+}
+
+.base-grid div.tfoot {
+	position:absolute;
+	left:0;
+	right:0;
+	bottom:0;
+	height:27px;
+	background-color:#eee;
+	line-height:27px;
+	padding:0 20px 0 20px;
+	border-top: 1px #e5e5e5 solid;
+}
+
+.base-grid div.tbody td {
+	border-bottom: 1px #eee solid;
+	line-height:26px;
+}
+
+.base-grid div.tbody td div.cell {
+	padding:0 5px;	
+}
+
+.base-grid div.tbody table {
+	border-right: 1px #eee solid;
+}
+
+.base-grid .op {
+    text-align: center;
+}
+
+.base-grid .op a {
+    color: red;
+    text-decoration: underline;
+}
+
+.base-grid div.left {
+	float:left;
+}
+
+.base-grid div.right {
+	float:right;
+}
+/* /base grid */
