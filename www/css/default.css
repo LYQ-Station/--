@@ -281,6 +281,7 @@ input.datepicker {
 
 .base-grid div.tbody table {
 	border-right: 1px #eee solid;
+	border-collapse:collapse;
 }
 
 .base-grid .op {
@@ -290,6 +291,10 @@ input.datepicker {
 .base-grid .op a {
     color: red;
     text-decoration: underline;
+}
+
+.base-grid tr.odd {
+	background-color:#e5e5e5;	
 }
 
 .base-grid div.left {

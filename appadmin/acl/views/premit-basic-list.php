@@ -19,7 +19,7 @@
 	<div class="base-grid" id="list">
     	<div class="thead">
         	<table>
-                <tr id="xxx">
+                <tr>
                     <th width="25" _field_='chk'><input type="checkbox" /></th>
                     <th width="100" _field_='id'>ID</th>
                     <th width="1500" _field_='code'>Code</th>
@@ -32,7 +32,7 @@
             </table>
         </div>
         <div class="tbody">
-        	<table id="tt">
+        	<table>
                 <?php if (!$this->items):?>
                 <tr>
                     <td colspan="7" align="center">暂无记录。</td>
@@ -99,7 +99,6 @@ $(function()
 		/*columes : [
 			{'_field_':'',width:25},
 		],*/
-		header : $('#xxx')[0],
 		enabled : true,
 		editable : true,
 		events : {

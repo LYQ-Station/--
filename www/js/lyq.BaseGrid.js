@@ -11,7 +11,6 @@ lyq.Table = function (table, configs)
 	table = $(table);
 	this.configs = {
 		enabled : true,
-		allow_multiple_selection : false,
 		post_name : 'bg'
 	};
 	
@@ -22,9 +21,6 @@ lyq.Table = function (table, configs)
 			this.configs[p] = configs[p];
 		}
 	}
-	
-	this.selected_index = -1;
-	this.selected_indies = [];
 	
 	this.table = table;
 	this.header = table.find('thead');
@@ -112,7 +108,6 @@ lyq.Table.prototype.refresh_cells = function ()
 {
 	var rows = this.table[0].rows;
 	var cells;
-	var div;
 	var cols = this.table[0].getElementsByTagName('col');
 	
 	for (var i=0; i<rows.length; i++)
@@ -195,12 +190,13 @@ lyq.Table.prototype.render_cell = function (cell, cols)
 	
 	jcell.empty();
 	jcell.append(div);
+	
+	this.redraw();
 }
 
 lyq.Table.prototype.redraw = function ()
 {
-//	var rows = $this.body[0].rows;
-	
+	this.body.find('tr:odd').addClass('odd');
 }
 
 lyq.Table.prototype.set_enabled = function (enabled)
@@ -240,30 +236,12 @@ lyq.Table.prototype.set_enabled = function (enabled)
 	this.configs.enabled = enabled;
 }
 
-lyq.Table.prototype.selecte_all = function ()
-{
-	if (!this.configs.allow_multiple_selection)
-		return;
-	
-	$(this).troggle('event_selected_all');
-}
-
-lyq.Table.prototype.clear_selection = function ()
-{
-	this.selected_index = -1;
-	
-	var rows = this.table[0].rows;
-	for (var i=0; i<rows; i++)
-	{
-		rows[i].style.backgroundColor = '';
-		rows[i].setAttribute('_sel_', null);
-	}
-}
-
 lyq.BaseGrid = function (table, configs)
 {
 	table = $(table);
-	this.configs = {};
+	this.configs = {
+		allow_multiple_selection : false
+	};
 	
 	if (configs)
 	{
@@ -272,6 +250,13 @@ lyq.BaseGrid = function (table, configs)
 			this.configs[p] = configs[p];
 		}
 	}
+	
+	var self = this;
+	
+	this.selected_index = -1;
+	this.selected_row = undefined;
+	
+	this.selected_rows = [];
 	
 	var header_div = table.find('div.thead');
 	var body_div = table.find('div.tbody');
@@ -295,16 +280,74 @@ lyq.BaseGrid = function (table, configs)
 		this.configs.header = this.header[0].rows[0];
 	}
 	
-	
 	table.find('div.tbody').scroll(function ()
 	{
 		header_div.scrollLeft(body_div.scrollLeft());
 	});
 	
-	this.tbody = new lyq.Table(this.body, configs);
+	this.tbody = new lyq.Table(this.body, this.configs);
+	
+	this.tbody.body.find('tr').live('click', function ()
+	{
+		var flag = false;
+		var selected_rows = [];
+		for (var i=0; i<self.selected_rows.length; i++)
+		{
+			if (this == self.selected_rows[i])
+			{
+				flag = true;
+				continue;
+			}
+			
+			selected_rows.push(self.selected_rows[i]);
+		}
+		
+		if (flag)
+		{
+			self.selected_index = -1;
+			self.selected_row = undefined;
+			delete self.selected_rows;
+			self.selected_rows = selected_rows;
+			
+			return;
+		}
+		
+		self.selected_index = this.rowIndex;
+		self.selected_rows.push(this);
+		self.selected_row = this;
+	}).live('mouseover', function ()
+	{
+		this.style.backgroundColor = '#ffffcc';
+	}).live('mouseout', function ()
+	{
+		this.style.backgroundColor = '';
+	});
+	
+	this.selected_indies = [];
+	this.selected_rows = [];
 }
 
 lyq.BaseGrid.prototype.init = function ()
 {
 	
+}
+
+lyq.BaseGrid.prototype.selecte_all = function ()
+{
+	if (!this.configs.allow_multiple_selection)
+		return;
+	
+	$(this).troggle('event_selected_all');
+}
+
+lyq.BaseGrid.prototype.clear_selection = function ()
+{
+	this.selected_index = -1;
+	
+	var rows = this.table[0].rows;
+	for (var i=0; i<rows; i++)
+	{
+		rows[i].style.backgroundColor = '';
+		rows[i].setAttribute('_sel_', null);
+	}
 }
