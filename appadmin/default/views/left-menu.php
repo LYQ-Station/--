@@ -1,20 +1,11 @@
 <ul id="navigation" class="treeview">
     <ul>
-        <li><span>用户管理</span>
-            <ul class="sub">
-                <li><a href="<?=$this->buildUrl('list','index','user')?>">用户列表</a></li>
-                <li><a href="<?=$this->buildUrl('users','index','blog')?>">用户相关博客</a></li>
-            </ul>
-        </li>
-    </ul>
-    <ul>
-        <li><span>微博管理</span>
+        <li><span>Resource</span>
             <ul class="sub">
                 <li><a href="<?=$this->buildUrl('list','resource','resource')?>">ResourceList</a></li>
                 <li><a href="<?=$this->buildUrl('addpage','resource','resource')?>">Add Resource</a></li>
                 <li><a href="<?=$this->buildUrl('addpage','volume','resource')?>">Add Volume</a></li>
                 <li><a href="<?=$this->buildUrl('addpage','uri','resource')?>">Add URI</a></li>
-                <li><a href="<?=$this->buildUrl('list','media','blog')?>">博文媒体列表</a></li>
             </ul>
         </li>
     </ul>
@@ -29,14 +20,6 @@
     </ul>
     
     <ul>
-        <li><span>路况管理</span>
-            <ul class="sub">
-                <li><a href="<?=EXT_URL.'/pages/traffic/digest.php'?>">管理路况(外链)</a></li>
-            </ul>
-        </li>
-    </ul>
-    
-    <ul>
         <li><span>日志管理</span>
             <ul class="sub">
                 <li><a href="#">前端日志</a></li>
@@ -46,7 +29,7 @@
     </ul>
     
     <ul>
-        <li><span>系统设置</span>
+        <li><span>System Settings</span>
             <ul class="sub">
                 <!--<li><span>基础资料设置</span>
                     <ul class="sub">
@@ -58,12 +41,13 @@
                     </ul>
                 </li>-->
                 
-                <li><span>权限设置</span>
+                <li><span>ACL</span>
                     <ul class="sub">
                         <li><a href="<?=$this->buildUrl('index','group','acl')?>">组织架构权限树</a></li>
                         <li><a href="<?=$this->buildUrl('list','permitbasic','acl')?>">权限列表</a></li>
 						<li><a href="<?=$this->buildUrl('index','role','acl')?>">角色</a></li>
-                        <li><a href="<?=$this->buildUrl('index','user','acl')?>">用户</a></li>
+                        <li><a href="<?=$this->buildUrl('list','user','acl')?>">用户</a></li>
+                        <li><a href="<?=$this->buildUrl('list','token','acl')?>">当前令牌</a></li>
                     </ul>
                 </li>
         
